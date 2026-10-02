@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyper Digital Experience & Glass Architecture</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: {
+                            950: '#020307',
+                            900: '#070a12',
+                            800: '#0e1322',
+                        },
+                        cyber: {
+                            cyan: '#00f0ff',
+                            purple: '#8b5cf6',
+                            pink: '#ec4899',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    },
+                    animation: {
+                        'glow-pulse': 'glowPulse 6s ease-in-out infinite',
+                        'float': 'float 8s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        glowPulse: {
+                            '0%, 100%': { opacity: 0.35, transform: 'scale(1)' },
+                            '50%': { opacity: 0.65, transform: 'scale(1.08)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js Library for GPU Accelerated 3D Sphere -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        body {
+            background-color: #020307;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* GPU Acceleration Layers */
+        .gpu-accelerated {
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        /* Glassmorphism Surface Base */
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.45);
+            backdrop-filter: blur(20px) saturate(190%);
+            -webkit-backdrop-filter: blur(20px) saturate(190%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(0, 240, 255, 0.35);
+            box-shadow: 0 25px 60px rgba(0, 240, 255, 0.15),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        /* Specular Dynamic Gradient Text */
+        .text-gradient-hyper {
+            background: linear-gradient(135deg, #ffffff 0%, #00f0ff 40%, #a855f7 75%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Glass Button Styling */
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-btn-primary:hover {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.4) 0%, rgba(139, 92, 246, 0.4) 100%);
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.4), 0 0 15px rgba(168, 85, 247, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .glass-btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .glass-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020307; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 240, 255, 0.6); }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 relative">
+
+    <!-- GPU Accelerated Background Lights -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="gpu-accelerated absolute -top-32 left-1/4 w-[500px] h-[500px] bg-cyber-cyan/15 rounded-full blur-[140px] animate-glow-pulse"></div>
+        <div class="gpu-accelerated absolute top-1/2 -right-32 w-[600px] h-[600px] bg-cyber-purple/20 rounded-full blur-[160px] animate-glow-pulse"></div>
+        <div class="gpu-accelerated absolute -bottom-32 left-10 w-[550px] h-[550px] bg-cyber-pink/15 rounded-full blur-[150px] animate-glow-pulse"></div>
+        <!-- Fine Dot Mesh Grid Layer -->
+        <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:32px_32px] opacity-70"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-50 px-4 sm:px-8 py-5 transition-all">
+        <nav class="max-w-7xl mx-auto glass-panel rounded-2xl px-6 py-3.5 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyber-cyan via-cyber-purple to-cyber-pink p-0.5 shadow-lg shadow-cyber-cyan/30 group-hover:scale-105 transition-transform">
+                    <div class="w-full h-full bg-obsidian-950 rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-cube text-cyber-cyan text-sm"></i>
+                    </div>
+                </div>
+                <span class="font-extrabold text-lg tracking-tight text-white">NEXUS<span class="text-cyber-cyan">.STUDIO</span></span>
+            </a>
+
+            <!-- Nav Links -->
+            <div class="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <a href="#work" class="hover:text-cyber-cyan transition-colors">Architecture</a>
+                <a href="#capabilities" class="hover:text-cyber-cyan transition-colors">Capabilities</a>
+                <a href="#metrics" class="hover:text-cyber-cyan transition-colors">Performance</a>
+                <a href="#about" class="hover:text-cyber-cyan transition-colors">About</a>
+            </div>
+
+            <!-- Action CTA -->
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-emerald-500/30 text-[11px] font-mono text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span id="fps-counter">60 FPS</span>
+                </div>
+                <a href="#contact" class="glass-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold text-white tracking-wide uppercase">
+                    Start Project
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Hero Section (Left-Aligned Content + Right 3D Sphere) -->
+    <section class="relative z-10 pt-10 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-[calc(100vh-100px)] flex flex-col justify-center">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <!-- LEFT COLUMN: Headline & Copy -->
+            <div class="lg:col-span-7 space-y-8 text-left">
+                
+                <!-- Exclusive Badge -->
+                <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-panel text-xs font-medium text-cyber-cyan border-cyber-cyan/30">
+                    <i class="fa-solid fa-sparkles text-amber-400"></i>
+                    <span class="tracking-wide">NEXT-GEN DIGITAL ARCHITECTURE & ENGINE</span>
+                </div>
+
+                <!-- Primary Left Headline -->
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08]">
+                    We Craft <br class="hidden sm:inline"/>
+                    <span class="text-gradient-hyper">Hyper-Digital Experiences</span> <br/>
+                    &amp; Glass Architecture
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl">
+                    Pushing the boundaries of web craftsmanship with high-depth glassmorphism, realtime WebGL shaders, ultra-fast 60 FPS performance, and high-converting creative frontend engineering.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                    <a href="#work" class="glass-btn-primary px-8 py-4 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-3 group">
+                        <span>EXPLORE SHOWCASE</span>
+                        <i class="fa-solid fa-arrow-right-long text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="#contact" class="glass-btn-secondary px-8 py-4 rounded-xl font-semibold text-sm text-slate-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt text-cyber-cyan"></i>
+                        <span>GET PROPOSAL</span>
+                    </a>
+                </div>
+
+                <!-- Verified Security & Tech Stack Badges -->
+                <div class="pt-6 border-t border-slate-800/80 flex flex-wrap items-center gap-6 text-xs text-slate-400">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-microchip text-cyber-cyan"></i>
+                        <span>Hardware Composition</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-cyber-purple"></i>
+                        <span>WebGL 2.0 Shader Pipeline</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-gauge-high text-emerald-400"></i>
+                        <span>Zero Frame Latency</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Hyper-Polished 3D Quantum Prism Sphere Container -->
+            <div class="lg:col-span-5 relative flex items-center justify-center min-h-[420px] sm:min-h-[500px]">
+                
+                <!-- Ambient Backdrop Glow behind Sphere -->
+                <div class="absolute w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-tr from-cyber-cyan/30 via-cyber-purple/30 to-cyber-pink/20 rounded-full blur-3xl animate-pulse"></div>
+
+                <!-- Main Glass Card Frame for 3D Viewport -->
+                <div class="relative w-full h-[420px] sm:h-[500px] glass-panel rounded-3xl p-4 overflow-hidden flex flex-col justify-between border-white/20">
+                    
+                    <!-- Top Card Status Header -->
+                    <div class="flex items-center justify-between z-20 px-3 py-2 bg-slate-950/60 rounded-xl backdrop-blur-md border border-white/10">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyber-cyan animate-ping"></span>
+                            <span class="text-[11px] font-mono text-slate-300 font-semibold">QUANTUM_CORE_3D</span>
+                        </div>
+                        <div class="text-[10px] font-mono text-cyber-cyan">DYNAMIC_SHADERS</div>
+                    </div>
+
+                    <!-- WebGL Canvas Mount Container -->
+                    <div id="canvas-container" class="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+                    <!-- Floating Interactive Overlay Badge -->
+                    <div class="relative z-20 self-end bg-obsidian-900/80 backdrop-blur-md p-3.5 rounded-2xl border border-white/15 max-w-xs space-y-1 text-left">
+                        <div class="flex items-center gap-2 text-xs font-bold text-white">
+                            <i class="fa-solid fa-hand-pointer text-cyber-cyan"></i>
+                            <span>Interactive Quantum Sphere</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300 leading-tight">Drag to rotate the geometric glass core or move your mouse to deform energy particles.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATISTICS GRID SECTION (Fixed spacing, zero text overlap) -->
+    <section id="metrics" class="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border-white/15">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80">
+                
+                <!-- Stat 1 -->
+                <div class="pt-4 sm:pt-0 px-4 flex flex-col items-center justify-center">
+                    <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight flex items-center justify-center gap-1 whitespace-nowrap">
+                        <span>140</span><span class="text-cyber-cyan">+</span>
+                    </div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mt-2">Global Awards</div>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="pt-4 sm:pt-0 px-4 flex flex-col items-center justify-center">
+                    <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight flex items-center justify-center gap-1 whitespace-nowrap">
+                        <span>99.8</span><span class="text-cyber-purple">%</span>
+                    </div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mt-2">Client Satisfaction</div>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="pt-4 sm:pt-0 px-4 flex flex-col items-center justify-center">
+                    <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight flex items-center justify-center gap-1 whitespace-nowrap">
+                        <span>250M</span><span class="text-cyber-pink">+</span>
+                    </div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mt-2">Global Impressions</div>
+                </div>
+
+                <!-- Stat 4 -->
+                <div class="pt-4 sm:pt-0 px-4 flex flex-col items-center justify-center">
+                    <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight flex items-center justify-center gap-1 whitespace-nowrap">
+                        <span>60</span><span class="text-emerald-400">FPS</span>
+                    </div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mt-2">Smooth Rendering Engine</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Capabilities Showcase Grid -->
+    <section id="capabilities" class="relative z-10 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-left max-w-xl mb-12">
+            <span class="text-xs font-bold uppercase tracking-widest text-cyber-cyan">OUR CAPABILITIES</span>
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-white mt-2">Precision Craftsmanship</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Capability Card 1 -->
+            <div class="glass-panel rounded-2xl p-8 hover:-translate-y-2 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/30 flex items-center justify-center text-cyber-cyan text-xl mb-6">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Glass Architecture</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Custom CSS backdrop-filter layering, refraction shaders, and specular reflection maps designed for hyper-polished modern web products.
+                </p>
+            </div>
+
+            <!-- Capability Card 2 -->
+            <div class="glass-panel rounded-2xl p-8 hover:-translate-y-2 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center text-cyber-purple text-xl mb-6">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">3D Interactive Cores</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Embedded Three.js canvas engines, real-time particle physics, custom fragment shaders, and 60fps locked animations.
+                </p>
+            </div>
+
+            <!-- Capability Card 3 -->
+            <div class="glass-panel rounded-2xl p-8 hover:-translate-y-2 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-cyber-pink/10 border border-cyber-pink/30 flex items-center justify-center text-cyber-pink text-xl mb-6">
+                    <i class="fa-solid fa-gauge-high"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">GPU Optimization</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Hardware-composited layers, optimized paint budgets, zero reflow bottlenecks, and smooth performance on mobile and desktop devices.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="relative z-10 border-t border-slate-800/80 py-12 px-4 sm:px-8 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                <span class="font-mono text-slate-300">NEXUS STUDIO © 2026 • HYPER DIGITAL ARCHITECTURE</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="#" class="hover:text-cyber-cyan transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-cyber-cyan transition-colors">Upwork Portfolio</a>
+                <a href="#" class="hover:text-cyber-cyan transition-colors">GitHub Repository</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Three.js Optimized Sphere Engine -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- FPS Performance Counter ---
+            let frameCount = 0;
+            let lastTime = performance.now();
+            const fpsCounter = document.getElementById('fps-counter');
+
+            function updateFPS() {
+                frameCount++;
+                const now = performance.now();
+                if (now - lastTime >= 1000) {
+                    const fps = Math.round((frameCount * 1000) / (now - lastTime));
+                    fpsCounter.textContent = `${fps} FPS`;
+                    frameCount = 0;
+                    lastTime = now;
+                }
+                requestAnimationFrame(updateFPS);
+            }
+            requestAnimationFrame(updateFPS);
+
+            // --- Three.js 3D Quantum Prism Sphere Setup ---
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Scene, Camera, Renderer
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.z = 6;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Outer Wireframe Crystal Icosahedron Shell
+            const outerGeo = new THREE.IcosahedronGeometry(1.8, 2);
+            const outerMat = new THREE.MeshBasicMaterial({
+                color: 0x00f0ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.35
+            });
+            const outerSphere = new THREE.Mesh(outerGeo, outerMat);
+            scene.add(outerSphere);
+
+            // Inner Glowing Energy Core
+            const innerGeo = new THREE.SphereGeometry(1.2, 32, 32);
+            const innerMat = new THREE.MeshPhongMaterial({
+                color: 0x8b5cf6,
+                emissive: 0x4c1d95,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.85,
+                wireframe: false
+            });
+            const innerSphere = new THREE.Mesh(innerGeo, innerMat);
+            scene.add(innerSphere);
+
+            // Orbiting Particle Energy Cloud
+            const particleCount = 280;
+            const particleGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                const u = Math.random();
+                const v = Math.random();
+                const theta = u * 2.0 * Math.PI;
+                const phi = Math.acos(2.0 * v - 1.0);
+                const r = 2.2 + Math.random() * 0.8;
+
+                positions[i] = r * Math.sin(phi) * Math.cos(theta);
+                positions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+                positions[i + 2] = r * Math.cos(phi);
+            }
+
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMat = new THREE.PointsMaterial({
+                color: 0xec4899,
+                size: 0.05,
+                transparent: true,
+                opacity: 0.8
+            });
+            const particleSystem = new THREE.Points(particleGeo, particleMat);
+            scene.add(particleSystem);
+
+            // Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const pointLight1 = new THREE.PointLight(0x00f0ff, 2, 50);
+            pointLight1.position.set(5, 5, 5);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0xec4899, 2, 50);
+            pointLight2.position.set(-5, -5, -5);
+            scene.add(pointLight2);
+
+            // Mouse & Touch Drag Interaction
+            let targetRotationX = 0;
+            let targetRotationY = 0;
+            let mouseX = 0;
+            let mouseY = 0;
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+
+                    targetRotationY += deltaX * 0.008;
+                    targetRotationX += deltaY * 0.008;
+
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+            });
+
+            // Smooth Optimized Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Idle Rotation + Inertia Drag
+                outerSphere.rotation.y += 0.004;
+                outerSphere.rotation.x += 0.002;
+
+                innerSphere.rotation.y -= 0.006;
+                particleSystem.rotation.y += 0.002;
+
+                if (isDragging) {
+                    outerSphere.rotation.y += (targetRotationY - outerSphere.rotation.y) * 0.1;
+                    outerSphere.rotation.x += (targetRotationX - outerSphere.rotation.x) * 0.1;
+                    innerSphere.rotation.y += (targetRotationY - innerSphere.rotation.y) * 0.1;
+                } else {
+                    // Parallax follow mouse move
+                    scene.rotation.y = mouseX * 0.3;
+                    scene.rotation.x = mouseY * 0.3;
+                }
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Responsive Viewport Resize Handling
+            window.addEventListener('resize', () => {
+                const newWidth = container.clientWidth;
+                const newHeight = container.clientHeight;
+                camera.aspect = newWidth / newHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(newWidth, newHeight);
+            });
+        });
+    </script>
+</body>
+</html>
